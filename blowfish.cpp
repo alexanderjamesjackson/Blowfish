@@ -222,9 +222,19 @@ void Blowfish::setKey(vector<uint8_t> key){
         _pArray[i] ^= key32bit;
     }
 
+    //Initialise S-boxes by encrypting zeros and placing this data into the arrays
+    uint64_t data = 0x0000000000000000;
 
-    //succesive initialisation requires blowfish to be ran on zero blocks
+    for (int i = 0; i < 4; ++i) { // For each S-box
+        for (int j = 0; j < 256; j += 2) { // Process two entries at a time
+            encrypt(data); 
+            _sBox[i][j] = data >> 32; 
+            _sBox[i][j + 1] = data & 0xFFFFFFFF; 
+        }
+}
+
 };
+
 
 
 void Blowfish::encrypt(uint64_t & data){
@@ -269,5 +279,32 @@ uint32_t Blowfish::Ffunction(uint32_t data){
     uint32_t output = ((_sBox[0][x1] + _sBox[0][x2]) ^ _sBox[0][x3]) + _sBox[0][x4];
 
     return output;
+};
 
+
+void Blowfish::decrypt(uint64_t & data){
+    uint32_t LHS;
+    uint32_t RHS;
+
+    //Shift data right by 32 to extract LHS of data i.e. MSBits
+    LHS = data >> 32;
+    //Apply bitwise and between data and 32 bit of ones (operation will extend 32bit to 64 bit so that they line up with correct part)
+    RHS = data & 0xFFFFFFFF;
+
+    for(int i = 17 ; i > 1 ; i--){
+        uint32_t inRHS = RHS;
+        uint32_t inLHS = LHS;
+
+        RHS = inLHS ^ _pArray[i];
+        LHS = Ffunction(RHS) ^ inRHS;
+    }
+
+    uint32_t inRHS = RHS;
+    uint32_t inLHS = LHS;
+
+    LHS = inRHS ^ _pArray[0];
+
+    RHS = inLHS ^ _pArray[1];
+
+    data = (static_cast<uint64_t>(LHS)<<32 )| RHS;
 };
