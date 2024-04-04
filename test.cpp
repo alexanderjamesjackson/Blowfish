@@ -1,27 +1,51 @@
 #include "blowfish.hpp"
 
-
 using namespace std;
 
+
+
+
 int main(){
-    vector<uint8_t> keyCorrect = {0x00, 0x01, 0x10, 0x11};
-    vector<uint8_t> keyWrong = {0x00, 0x10, 0x01, 0x11};
+    vector<uint8_t> key = {0x00, 0x01, 0x10, 0x11,0xAB, 0xBC};
 
-    Blowfish bc(keyCorrect);
+    Blowfish bc(key);
 
-    uint64_t data = 0x0123456789ABCDEF; 
-    cout << "Data before Encryption: "<< data << endl;
 
-    bc.encrypt(data);
-    cout<< "Data after Encryption: " << data << endl; 
-    uint64_t encryptedData = data;
+    string command;
+    string currentState  = "<Encrypt String> <Decrypt String>";
+    string usrString;
+    vector<uint64_t> strData;
 
-    bc.decrypt(data);
-    cout<<"Data after Decryption using correct key: " << data << endl;
+    
 
-    Blowfish bw(keyWrong);
+    while (true) {
+        cout << currentState << endl;
+        cout<< ">>";
+        getline(cin, command);
 
-    bw.decrypt(encryptedData);
+        if (command == "exit") {
+            break;
+        } 
+        
+        else if (command == "Encrypt String") {
+            cout<< "Enter String: ";
+            getline(cin,usrString);
+            strData = encryptString(bc, usrString);
+            cout << "Encrypted!" <<endl;
+            cout << "Example Data: " << strData[0] << endl;
+        } 
 
-    cout<<"Data after Decryption using wrong key: " << encryptedData << endl;
+        else if (command == "Decrypt String") {
+            // cout<< "Enter String: ";
+            // getline(cin,usrString);
+            string str = decryptData(bc, strData);
+            cout << "Decrypted! : " << str << endl;
+        } 
+
+        else {
+            cout << "Unknown command.\n";
+        }
+    }
+
+    cout << "Goodbye!\n";
 }

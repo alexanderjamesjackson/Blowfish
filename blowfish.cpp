@@ -1,5 +1,72 @@
 #include "blowfish.hpp"
 
+//Function to convert strings to a vector of 64 bit numbers (zero padded on end)
+vector<uint64_t> stringTo64Bit(const string & input){
+    int n = input.length();
+    vector<uint64_t> outputData;
+    int fullBlocks = n/8;
+    int remainder = n % 8;
+
+    for(int i = 0 ; i < fullBlocks ; i++){
+        uint64_t block;
+        memcpy(&block, input.data() + i * 8, 8); //copies 8 bytes of memory in string to the block address
+        outputData.push_back(block);
+    }
+
+    if(remainder > 0 ){
+        uint64_t lastBlock = 0;
+        memcpy(&lastBlock, input.data() + fullBlocks * 8, remainder); //copies remaining bytes into a zeropadded 64 bit number
+        outputData.push_back(lastBlock);
+    }
+
+    return outputData;
+};
+
+
+
+string Bit64ToString(const vector<uint64_t> & data){
+    string outputString;
+    outputString.reserve(data.size()* 8);
+
+    for(int i = 0 ; i < data.size() ; i++){
+
+        for(int j = 0 ; j < 8 ; j++){
+
+            char byte = (data[i]>>(j * 8)) & 0xFF;
+            if(byte != '\0'){
+                outputString += byte; //If bytes aren't null then add to string
+            }
+        }
+    }
+
+    return outputString;
+};
+
+
+vector<uint64_t> encryptString(const Blowfish & b, string str){
+
+    vector<uint64_t> data = stringTo64Bit(str);
+
+    for(int i = 0 ; i < data.size() ; i++){
+        b.encrypt(data[i]);
+    }
+
+    return data;
+};
+
+ string decryptData(const Blowfish & b, vector<uint64_t> data){
+
+    for(int i = 0 ; i < data.size() ; i++){
+        b.decrypt(data[i]);
+    }
+
+    string str = Bit64ToString(data);
+
+    
+
+    return str;
+};
+
 
 
 Blowfish::Blowfish(vector<uint8_t> key){
@@ -237,7 +304,7 @@ void Blowfish::setKey(vector<uint8_t> key){
 
 
 
-void Blowfish::encrypt(uint64_t & data){
+void Blowfish::encrypt(uint64_t & data) const{
     uint32_t LHS;
     uint32_t RHS;
 
@@ -268,7 +335,7 @@ void Blowfish::encrypt(uint64_t & data){
     data = (static_cast<uint64_t>(LHS)<<32 )| RHS;
 };
 
-uint32_t Blowfish::Ffunction(uint32_t data){
+uint32_t Blowfish::Ffunction(uint32_t data) const{
     //split data into four 8 bit addresses
     uint8_t x1 = data >> 24;
     uint8_t x2 = (data >> 16) & 0xFF;
@@ -276,13 +343,13 @@ uint32_t Blowfish::Ffunction(uint32_t data){
     uint8_t x4 = data & 0xFF; 
     
     //Apply Logic to each address return
-    uint32_t output = ((_sBox[0][x1] + _sBox[0][x2]) ^ _sBox[0][x3]) + _sBox[0][x4];
+    uint32_t output = ((_sBox[0][x1] + _sBox[1][x2]) ^ _sBox[2][x3]) + _sBox[3][x4];
 
     return output;
 };
 
 
-void Blowfish::decrypt(uint64_t & data){
+void Blowfish::decrypt(uint64_t & data) const{
     uint32_t LHS;
     uint32_t RHS;
 
