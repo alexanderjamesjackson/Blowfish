@@ -1,41 +1,82 @@
 #include "fileManagement.hpp"
 
 
-string readFileToString(const string & path){
-    //read file specified by path in binary mode
-    ifstream file(path, ios::binary);
+vector<uint64_t> readFileAsBinary(const string & path){
 
-    //Create string from start of file to end of file
-    string content( (istreambuf_iterator<char>(file)) , istreambuf_iterator<char>() );
-
-    return content;
-};
-
-void saveEncryptedToFile(const vector<uint64_t> & data , const string & outputPath){
-    //Creates object to write to the output path in binary mode
-    ofstream outFile(outputPath, ios::binary);
-    for(int i = 0 ; i < data.size() ; i ++){
-
-        //Write data, interpret the 64 bit data as a series of bytes to write
-        outFile.write(reinterpret_cast<const char*>(&data[i]), sizeof(data[i]));
-
-    }
-};
-
-vector<uint64_t> readEncryptedFromFile(const string & path){
     vector<uint64_t> data;
-    ifstream file(path, ios::binary);
+
+    ifstream file(path, ios::binary | ios::ate);
+
+    if(!file){
+        cout<< "couldn't open file" << endl;
+        return data;
+    }
+
+    //Pointer is at end so tellg() returns size of file
+    streamsize size = file.tellg();
+    //Set pointer to beginning of data
+    file.seekg(0, ios::beg);
+
+    
+
     uint64_t block;
 
-    //While there is data to be read from the file add it to data
+    //Add blocks of 64bit data 
     while(file.read(reinterpret_cast<char*>(&block), sizeof(block))){
         data.push_back(block);
     }
+    
+    //check for remainder i.e data that is not 64 bit that needs padding
+    streamsize bytesLastRead = file.gcount();
+    uint64_t paddingValue = sizeof(block) - bytesLastRead;
+
+    //pad remainder of last 64 bit block with a value equal to how many values are being added
+    if(bytesLastRead > 0 ){
+
+        block <<= paddingValue * 8;
+
+        for(streamsize i = 0 ; i < paddingValue ; i++){
+            block |= paddingValue << (i * 8);
+        }
+
+        data.push_back(block);
+    }
+
+    //if no remainder then pad anyways with an extra block
+    else if(bytesLastRead == 0){
+        paddingValue = sizeof(block);
+        block = 0;
+
+        for(streamsize i = 0 ; i < paddingValue ; i++){
+            block |= paddingValue << (i * 8);
+        }
+
+        data.push_back(block);
+
+    }
 
     return data;
+
+
 };
 
-void saveStringToFile(const string& str, const string& outputPath){
-    ofstream file(outputPath);
-    file << str;
+
+void writeFileAsBinary(const string & path, const vector<uint64_t> & data){
+    //Wipe file if it already exists
+    ofstream file(path, ios::binary | ios::trunc);
+
+    for(int i = 0 ; i < data.size() - 1 ; i++){
+        file.write(reinterpret_cast<const char*>(&data[i]), sizeof(uint64_t));
+    }
+
+    //handle last block seperately
+
+    uint64_t lastBlock = data.back();
+    //Extract size of padding used
+    uint8_t paddingSize = lastBlock & 0xFF;
+
+    int dataSizeLastBlock = sizeof(uint64_t) - paddingSize;
+
+    file.write(reinterpret_cast<const char*>(&lastBlock), dataSizeLastBlock);
+
 };

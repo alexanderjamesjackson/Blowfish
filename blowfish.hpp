@@ -20,13 +20,8 @@ class Blowfish{
 };
 
 
-vector<uint64_t> stringTo64Bit(const string & input);
 
-string Bit64ToString(const vector<uint64_t> & data);
-
-vector<uint64_t> encryptString(const Blowfish & b, string str);
-
-string decryptData(const Blowfish & b, vector<uint64_t> data);
-
+void encryptData(const Blowfish & b, vector<uint64_t> & data);
+void decryptData(const Blowfish & b, vector<uint64_t> & data);
 
 vector<uint8_t> stringToKey(const string & key);

@@ -10,7 +10,7 @@ int main(){
     string command;
     string menu  = "<Encrypt File> <Decrypt File>";
     string path;
-    vector<uint64_t> strData;
+    vector<uint64_t> data;
     string str;
     string password;
 
@@ -27,22 +27,22 @@ int main(){
         else if (command == "Encrypt File") {
             cout<< "Enter Path To Input: ";
             getline(cin,path);
-
-            str = readFileToString(path);
+            data = readFileAsBinary(path);
 
             cout<< "Enter Encryption Password: ";
+
             getline(cin,password);
+
             vector<uint8_t> key = stringToKey(password);
             
-    
             Blowfish b(key);
 
-            strData = encryptString(b, str);
-
+            encryptData(b, data);
+        
             cout << "Enter Path To Output: ";
             getline(cin,path);
 
-            saveEncryptedToFile(strData, path);
+            writeFileAsBinary(path, data);
 
             cout << "Encrypted!" <<endl;
             
@@ -52,7 +52,7 @@ int main(){
             cout<< "Enter Path To Input: ";
             getline(cin,path);
 
-            strData = readEncryptedFromFile(path);
+            data = readFileAsBinary(path);
 
             cout<< "Enter Encryption Password: ";
             getline(cin,password);
@@ -61,13 +61,13 @@ int main(){
 
             Blowfish b(key);
 
-            str = decryptData(b, strData);
+            decryptData(b, data);
 
             cout << "Enter Path To Output: ";
 
             getline(cin,path);
 
-            saveStringToFile(str, path);
+            writeFileAsBinary(path,data);
 
             cout << "Decrypted!" <<endl;
         } 
