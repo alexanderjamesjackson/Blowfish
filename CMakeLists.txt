@@ -7,4 +7,4 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 
-add_executable(Blowfish test.cpp blowfish.cpp)
+add_executable(Blowfish test.cpp blowfish.cpp fileManagement.cpp)
