@@ -27,3 +27,6 @@ string Bit64ToString(const vector<uint64_t> & data);
 vector<uint64_t> encryptString(const Blowfish & b, string str);
 
 string decryptData(const Blowfish & b, vector<uint64_t> data);
+
+
+vector<uint8_t> stringToKey(const string & key);

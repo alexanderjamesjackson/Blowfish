@@ -67,7 +67,15 @@ vector<uint64_t> encryptString(const Blowfish & b, string str){
     return str;
 };
 
+vector<uint8_t> stringToKey(const string & str){
+    vector<uint8_t> key;
 
+    for(char c : str){
+        key.push_back(static_cast<uint8_t>(c));
+    }
+
+    return key;
+};
 
 Blowfish::Blowfish(vector<uint8_t> key){
     //initialise pArray and sBox to hexadecimal digits of pi
