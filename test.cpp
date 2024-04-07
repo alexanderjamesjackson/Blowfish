@@ -8,7 +8,7 @@ using namespace std;
 int main(){
 
     string command;
-    string menu  = "<Encrypt File> <Decrypt File>";
+    string menu  = "<Encrypt File /e> <Decrypt File /d>";
     string path;
     vector<uint64_t> data;
     string str;
@@ -23,7 +23,7 @@ int main(){
             break;
         } 
         
-        else if (command == "Encrypt File") {
+        else if (command == "e") {
             cout<< "Enter Path To Input: ";
             getline(cin,path);
             data = readFileAsBinary(path);
@@ -47,7 +47,7 @@ int main(){
             
         } 
 
-        else if (command == "Decrypt File") {
+        else if (command == "d") {
             cout<< "Enter Path To Input: ";
             getline(cin,path);
 
