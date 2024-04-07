@@ -12,9 +12,8 @@ int main(){
     string path;
     vector<uint64_t> data;
     string str;
-    string password;
-
-
+    
+    
     while (true) {
         cout << menu << endl;
         cout<< ">>";
@@ -30,7 +29,7 @@ int main(){
             data = readFileAsBinary(path);
 
             cout<< "Enter Encryption Password: ";
-
+            string password;
             getline(cin,password);
 
             vector<uint8_t> key = stringToKey(password);
@@ -55,6 +54,7 @@ int main(){
             data = readFileAsBinary(path);
 
             cout<< "Enter Encryption Password: ";
+            string password;
             getline(cin,password);
 
             vector<uint8_t> key = stringToKey(password);

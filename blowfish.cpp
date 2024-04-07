@@ -17,6 +17,7 @@ void decryptData(const Blowfish & b, vector<uint64_t> & data){
 
 };
 
+
 vector<uint8_t> stringToKey(const string & str){
     vector<uint8_t> key;
 
@@ -26,6 +27,7 @@ vector<uint8_t> stringToKey(const string & str){
 
     return key;
 };
+
 
 Blowfish::Blowfish(vector<uint8_t> key){
     //initialise pArray and sBox to hexadecimal digits of pi
@@ -235,13 +237,13 @@ void Blowfish::setKey(vector<uint8_t> key){
     for(int i = 0; i < _pArray.size() ; i++){
         uint32_t key32bit = 0;
         //Counter to track which 8bit key is being added
-        int j = 0;
 
         for(int k = 0 ; k < 4 ; k++){
             //Shift current data left by 8 bits and perform bitwise or to add in next key
-            key32bit = key32bit<<8 | key[j];
+            //Sequence 4i + k ensures that each array is initialised with the next 4 values
+            key32bit = (key32bit << 8) | key[(4*i + k) % key.size()];
+
             //Update to find next 8bit key to add including wrap around if at end
-            j = (j + 1) % key.size();
         }
         //Apply XOR operation to each element
         _pArray[i] ^= key32bit;
